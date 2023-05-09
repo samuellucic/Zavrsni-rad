@@ -1,8 +1,11 @@
 package hr.fer.zavrad.ga;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 public class GroupObject {
+	public static final Comparator<GroupObject> SIZE_COMPARATOR = (go1, go2) -> Double.compare(go1.getSize(), go2.getSize());
+	
 	private int index;
 	private double size;
 

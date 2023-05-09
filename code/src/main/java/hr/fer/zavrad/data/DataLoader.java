@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,7 +44,7 @@ public class DataLoader {
 			String title = reader.readLine().trim();
 			String[] info = reader.readLine().trim().split("\\s+");
 			
-			int capacity = Integer.parseInt(info[0]);
+			double capacity = Double.parseDouble(info[0]);
 			int n = Integer.parseInt(info[1]);
 			int solution = Integer.parseInt(info[2]);
 			double[] items = new double[n];
