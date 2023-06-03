@@ -18,16 +18,16 @@ public class LocalSearch4Insert implements IInsert {
 		List<Group> groups = chromosome.getGroups();
 		for (Group g : groups) {
 			if (g.getTotalSize() == capacity) continue;
-			iterations(items, g, capacity);
+			iterations(g, items, capacity);
 		}
 	}
 	
-	private void iterations(List<GroupObject> items, Group group, double capacity) {
+	private void iterations(Group group, List<GroupObject> items, double capacity) {
 		List<List<GroupObject>> lists = null;
 		double newBinSize = 0;
 		for (int i = 1; i <= BIN_MAX; i++) {
 			for (int j = 1; j <= ITEMS_MAX; j++) {
-				List<List<GroupObject>> newLists = change(items, group, new ArrayList<>(), new ArrayList<>(), 0, 0, capacity, i, j);				
+				List<List<GroupObject>> newLists = change(group, items, new ArrayList<>(), new ArrayList<>(), 0, 0, capacity, i, j);				
 				if (newLists == null) {
 					continue;
 				}
@@ -51,8 +51,8 @@ public class LocalSearch4Insert implements IInsert {
 	}
 
 	private List<List<GroupObject>> change(
-			List<GroupObject> items,
 			Group group,
+			List<GroupObject> items,
 			List<GroupObject> binReplacements,
 			List<GroupObject> itemsReplacements,
 			int numBin,
@@ -71,8 +71,8 @@ public class LocalSearch4Insert implements IInsert {
 				itemsReplacementsNew.add(items.get(j));
 				
 				List<List<GroupObject>> lists = change(
-						items,
 						group,
+						items,
 						binReplacementsNew,
 						itemsReplacementsNew,
 						i + 1,
