@@ -7,7 +7,7 @@ import hr.fer.zavrad.ga.Group;
 import hr.fer.zavrad.ga.GroupObject;
 import hr.fer.zavrad.ga.insertions.IInsert;
 
-public class LocalSearchInsert implements IInsert {
+public class LocalSearch1Insert implements IInsert {
 
 	@Override
 	public void insert(Chromosome chromosome, List<GroupObject> items, double capacity) {

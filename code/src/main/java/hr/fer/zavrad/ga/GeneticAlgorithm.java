@@ -16,7 +16,7 @@ import hr.fer.zavrad.ga.insertions.heuristics.FFDInsert;
 import hr.fer.zavrad.ga.insertions.localsearches.LocalSearch2Insert;
 import hr.fer.zavrad.ga.insertions.localsearches.LocalSearch3Insert;
 import hr.fer.zavrad.ga.insertions.localsearches.LocalSearch4Insert;
-import hr.fer.zavrad.ga.insertions.localsearches.LocalSearchInsert;
+import hr.fer.zavrad.ga.insertions.localsearches.LocalSearch1Insert;
 
 public class GeneticAlgorithm {
 	private static IFunction COST_FUNCTION = (groups, data, k) -> {
@@ -39,7 +39,7 @@ public class GeneticAlgorithm {
 			new BFDInsert(),
 			new B2FInsert()};
 	private static IInsert[] localSearches = {
-			new LocalSearchInsert(),
+			new LocalSearch1Insert(),
 			new LocalSearch2Insert(),
 			new LocalSearch3Insert(),
 			new LocalSearch4Insert()};

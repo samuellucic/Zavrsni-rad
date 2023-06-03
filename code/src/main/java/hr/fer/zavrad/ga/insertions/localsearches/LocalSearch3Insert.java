@@ -19,14 +19,14 @@ public class LocalSearch3Insert implements IInsert {
 			
 			for (int i = 0; i < groups.size() - 1; i++) {
 				Group g1 = groups.get(i);
+				double binSize1 = g1.getTotalSize();
+				if (binSize1 == capacity) continue;
 				
 				for (int j = i + 1; j < groups.size(); j++) {
 					Group g2 = groups.get(j);
 					
 					groupIter:
 					for (GroupObject go1 : g1.getGroup()) {
-						double binSize1 = g1.getTotalSize();
-						
 						for (GroupObject go2: g2.getGroup()) {
 							double newBinSize1 = binSize1 - go1.getSize() + go2.getSize();
 							double newBinSize2 = g2.getTotalSize() - go2.getSize() + go1.getSize();
