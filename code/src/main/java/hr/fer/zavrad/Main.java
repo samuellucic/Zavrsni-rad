@@ -1,5 +1,6 @@
 package hr.fer.zavrad;
 
+import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -10,7 +11,7 @@ import hr.fer.zavrad.ga.GeneticAlgorithm;
 public class Main {
 	
 	public static void main(String[] args) {
-		DataLoader dl = new DataLoader();
+		DataLoader dl = new DataLoader(Paths.get(args[0]));
 		Data data;
 		ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() / 4);//);1);//
 		while ((data = dl.getDataset()) != null) {

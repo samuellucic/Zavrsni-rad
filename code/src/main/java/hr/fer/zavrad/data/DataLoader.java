@@ -3,10 +3,8 @@ package hr.fer.zavrad.data;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,12 +16,13 @@ public class DataLoader {
 	private int datasetCount;
 	private int datasetNum;
 
-	public DataLoader() {
-		try (Stream<Path> paths = Files.walk(Paths.get(Data.class.getClassLoader().getResource(".").toURI()), 1)) {
+	public DataLoader(Path pathToData) {
+		try (Stream<Path> paths = Files.walk(pathToData, 1)) {
 			dataPaths = paths.filter(path -> path.getFileName().toString().startsWith("binpack"))
 							 .collect(Collectors.toList())
 							 .iterator();
-		} catch (IOException | URISyntaxException ignorable) {	
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
