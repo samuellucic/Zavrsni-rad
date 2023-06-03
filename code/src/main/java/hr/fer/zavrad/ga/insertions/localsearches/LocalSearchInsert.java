@@ -1,11 +1,11 @@
-package hr.fer.zavrad.ga.insertions;
+package hr.fer.zavrad.ga.insertions.localsearches;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import hr.fer.zavrad.ga.Chromosome;
 import hr.fer.zavrad.ga.Group;
 import hr.fer.zavrad.ga.GroupObject;
+import hr.fer.zavrad.ga.insertions.IInsert;
 
 public class LocalSearchInsert implements IInsert {
 
@@ -41,22 +41,6 @@ public class LocalSearchInsert implements IInsert {
 					g.getGroup().remove(replaced);
 					inserted = true;
 				}
-			}
-		}
-		
-		for (GroupObject go : items) {
-			boolean added = false;
-			for (Group g : chromosome.getGroups()) {
-				if (go.getSize() + g.getTotalSize() <= capacity) {
-					g.getGroup().add(go);
-					added = true;
-					break;
-				}
-			}
-			if (!added) {
-				List<GroupObject> gList = new ArrayList<>();
-				gList.add(go);
-				chromosome.getGroups().add(new Group(gList));
 			}
 		}
 	}

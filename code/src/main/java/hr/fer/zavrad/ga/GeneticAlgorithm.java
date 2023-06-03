@@ -5,11 +5,18 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 
 import hr.fer.zavrad.data.Data;
 import hr.fer.zavrad.ga.insertions.IInsert;
+import hr.fer.zavrad.ga.insertions.heuristics.B2FInsert;
+import hr.fer.zavrad.ga.insertions.heuristics.BFDInsert;
+import hr.fer.zavrad.ga.insertions.heuristics.BasicInsert;
+import hr.fer.zavrad.ga.insertions.heuristics.FFDInsert;
+import hr.fer.zavrad.ga.insertions.localsearches.LocalSearch2Insert;
+import hr.fer.zavrad.ga.insertions.localsearches.LocalSearch3Insert;
+import hr.fer.zavrad.ga.insertions.localsearches.LocalSearch4Insert;
+import hr.fer.zavrad.ga.insertions.localsearches.LocalSearchInsert;
 
 public class GeneticAlgorithm {
 	private static IFunction COST_FUNCTION = (groups, data, k) -> {
@@ -17,29 +24,39 @@ public class GeneticAlgorithm {
 		for (Group g : groups) {
 			cost += Math.pow((double)g.getTotalSize() / data.capacity(), k);
 		}
-		return cost / data.n();
+		return cost / (double)groups.size();
 	};
-	private static final int POP_SIZE = 49;
-	private static final int NUM_CROSS = 12;
-	private static final int NUM_MUTATE = 4;
-	private static final int NUM_INVERSE = 4;
+	
+	private static final int POP_SIZE = 50;
+	private static final int NUM_CROSS = 24;
 	private static final int K = 2;
-	private static final double MUTATION_PROBABILITY = 0.02;
-	private static final double INVERSE_PROBABILITY = 0.5;
+	private static final int TOURNAMENT_NUM = 2;
+	private static final double MUTATION_PROBABILITY = 0.2;
+
+	private static IInsert basicInsert = new BasicInsert();
+	private static IInsert[] heuristics = {
+			new FFDInsert(),
+			new BFDInsert(),
+			new B2FInsert()};
+	private static IInsert[] localSearches = {
+			new LocalSearchInsert(),
+			new LocalSearch2Insert(),
+			new LocalSearch3Insert(),
+			new LocalSearch4Insert()};
+	
 	
 	private Data data;
-	private IInsert insertionAlgorithm;
+	private boolean hybridized;
 	
-	public GeneticAlgorithm(Data data, IInsert insertionAlgorithm) {
-		Objects.nonNull(insertionAlgorithm);
+	public GeneticAlgorithm(Data data, boolean hybridized) {
 		this.data = data;
-		this.insertionAlgorithm = insertionAlgorithm;
+		this.hybridized = hybridized;
 	}
 	
-	public void setInsertionAlgorithm(IInsert insertionAlgorithm) {
-		this.insertionAlgorithm = insertionAlgorithm;
+	public void setHybridized(boolean hybridized) {
+		this.hybridized = hybridized;
 	}
-	
+
 	public String algorithm() {
 		Random random = new Random();
 		List<GroupObject> dataList = new ArrayList<>(data.n());
@@ -51,7 +68,8 @@ public class GeneticAlgorithm {
 		evaluatePopulation(population, COST_FUNCTION);
 		
 		int generation = 0;
-		boolean breakLoop = false;
+		
+		loop:
 		for ( ; generation < 100_000; generation++) {
 			// Best samples are at the end of the array
 			Arrays.sort(population);
@@ -59,69 +77,56 @@ public class GeneticAlgorithm {
 			for (Chromosome c : population) {
 				if (c.getGroups().size() <= data.solution()) {
 					//System.out.println(c.getFitness());
-					breakLoop = true;
-					break;
+					break loop;
 				}
 			}
-			if (breakLoop) {
-				break;
-			}
+			// TODO
+			// OVO SLUZI DA ZNAM DA PROGRAM ZAPRAVO RADI
+			// OBRISATI KAD ZAVRSIM
+//			if (generation % 1000 == 0) {
+//				System.out.println("Name: " + data.name() + " Generation: " + generation + "\nBin num: " + population[population.length - 1].getGroups().size());
+//			}
 			
-			if (generation % 1000 == 0) {
-				System.out.println("Name: " + data.name() + " Generation: " + generation + "\nBin num: " + population[population.length - 1].getGroups().size());
-			}
-			
+			Chromosome[] newPopulation = new Chromosome[NUM_CROSS * 2];
 			for (int i = 0; i < NUM_CROSS; i++) {
 				// Choosing parents from the best NUM_CROSS number of samples
-				int first = random.nextInt(NUM_CROSS); 
-				int second = random.nextInt(NUM_CROSS); 
-				while (first == second) {
-					second = random.nextInt(NUM_CROSS); 
-				}
+				Chromosome firstParent = pickParent(population, random, TOURNAMENT_NUM);
+				Chromosome secondParent = pickParent(population, random, TOURNAMENT_NUM);
 				
-				Chromosome firstParent = population[population.length - 1 - first];
-				Chromosome secondParent = population[population.length - 1 - second];
-				
-				// TODO
-				// PITATI JE LI OVO NAJBOLJI NAČIN NASUMIČNOG ODABIRANJA RODITELJA	
-				// ODNOSI SE NA SVE SILNE WHILE PETLJE SVAKI PRIMJER JE ISTI PA JE NEBITNO
 				Chromosome child1 = cross(firstParent, secondParent, random);
 				Chromosome child2 = cross(secondParent, firstParent, random);
 
-				// TODO
-				// PITATI JEL BOLJE RADITI MUTACIJU I INVERZ OVDJE
-				// ILI KAKO PISE U ALGORITMU
-				// PO MOJIM TESTIRANJIMA BOLJE IDE KADA SE DIJETE DIREKTNO MUTIRA
-				 mutate(child1, random);
-				 mutate(child2, random);
+				mutate(child1, random);
+				mutate(child2, random);
 				
-//				 inverse(child1, random);
-//				 inverse(child2, random);
-				
-				population[2 * i] = child1;
-				population[2 * i + 1] = child2;
-				
-				// TODO
-				// PITATI GDJE JE BOLJE RADITI EVALUACIJU
-				// OVDJE ILI NAKON SVIH OPERATORA KRIŽANJA
-				// ZBOG MIJEŠANJA NOVIH I STARIH
-//				evaluatePopulation(population, COST_FUNCTION);
-				// Arrays.sort(population);
+				newPopulation[2 * i] = child1;
+				newPopulation[2 * i + 1] = child2;
 			}
-			
-//			for (int i = 0; i < NUM_MUTATE; i++) {
-//				mutate(population[random.nextInt(POP_SIZE)], random);
-//			}
-//			
-//			for (int i = 0; i < NUM_INVERSE; i++) {
-//				inverse(population[random.nextInt(POP_SIZE)], random);
-//			}
-			
-			evaluatePopulation(population, COST_FUNCTION);
-//			System.out.println(population[population.length - 1]);
-		}
+			for (int i = 0; i < newPopulation.length; i++) {
+				population[i] = newPopulation[i];
+			}
 
-		return "Generation: " + generation + "\nBin num: " + population[population.length - 1].getGroups().size();
+			evaluatePopulation(population, COST_FUNCTION);
+		}
+		
+		return "Generation: " + generation 
+				+ "\nHybridized: " + hybridized
+				+ "\nBin num: " + population[population.length - 1].getGroups().size()
+				+ "\nOptimal: " + (population[population.length - 1].getGroups().size() == data.solution());
+	}
+	
+	private Chromosome pickParent(Chromosome[] population, Random random, int tournamentNum) {
+		List<Chromosome> tournamentPop = new ArrayList<>();
+		
+		while (tournamentPop.size() < tournamentNum) {
+			Chromosome newParent = population[random.nextInt(population.length)];
+			if (!tournamentPop.contains(newParent)) {
+				tournamentPop.add(newParent);
+			}
+		}
+		tournamentPop.sort(null);;
+		
+		return tournamentPop.get(tournamentNum - 1);
 	}
 
 	private void mutate(Chromosome child, Random random) {
@@ -149,20 +154,13 @@ public class GeneticAlgorithm {
 			}
 		}
 		
-		insertionAlgorithm.insert(child, reinserted, data.capacity());
+		if (hybridized) {
+			getInsertAlgorithm(random, localSearches).insert(child, reinserted, data.capacity());
+			getInsertAlgorithm(random, heuristics).insert(child, reinserted, data.capacity());
+		} else {
+			basicInsert.insert(child, reinserted, data.capacity());
+		}
 	}
-
-//	private void inverse(Chromosome child, Random random) {
-//		int binSize = child.getGroups().size();
-//		
-//		int first = random.nextInt(binSize); 
-//		int second = random.nextInt(binSize); 
-//		while (first == second) {
-//			second = random.nextInt(binSize); 
-//		}
-//
-//		Collections.swap(child.getGroups(), first, second);
-//	}
 
 	private Chromosome cross(Chromosome firstParent, Chromosome secondParent, Random random) {
 		Chromosome child = Chromosome.copyChromosome(secondParent);
@@ -203,7 +201,12 @@ public class GeneticAlgorithm {
 			}
 		}
 
-		insertionAlgorithm.insert(child, reinserted, data.capacity());
+		if (hybridized) {			
+			getInsertAlgorithm(random, localSearches).insert(child, reinserted, data.capacity());
+			getInsertAlgorithm(random, heuristics).insert(child, reinserted, data.capacity());
+		} else {
+			basicInsert.insert(child, reinserted, data.capacity());
+		}
 		
 		return child;
 	}
@@ -241,15 +244,16 @@ public class GeneticAlgorithm {
 					sum += num;
 				}
 				group.add(new Group(gList));
-
-			} else {
-				
 			}
+			
 			population[i] = new Chromosome(group);
 		}
 		
 		return population;
 	}
 	
-
+	private IInsert getInsertAlgorithm(Random random, IInsert[] insertAlgorithms) {
+		return insertAlgorithms[random.nextInt(insertAlgorithms.length)];
+	}
+	
 }

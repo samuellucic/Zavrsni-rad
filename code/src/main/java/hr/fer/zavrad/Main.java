@@ -6,11 +6,9 @@ import java.util.concurrent.Executors;
 import hr.fer.zavrad.data.Data;
 import hr.fer.zavrad.data.DataLoader;
 import hr.fer.zavrad.ga.GeneticAlgorithm;
-import hr.fer.zavrad.ga.insertions.BasicInsert;
-import hr.fer.zavrad.ga.insertions.HeuristicInsert;
 
 public class Main {
-
+	
 	public static void main(String[] args) {
 		DataLoader dl = new DataLoader();
 		Data data;
@@ -22,7 +20,7 @@ public class Main {
 		pool.close();
 	}
 	
-	static class Task implements Runnable {
+	private static class Task implements Runnable {
 		private Data data;
 		
 		public Task(Data data) {
@@ -32,15 +30,12 @@ public class Main {
 		@Override
 		public void run() {
 			try {
-				
-				GeneticAlgorithm ga = new GeneticAlgorithm(data, new BasicInsert());
+				GeneticAlgorithm ga = new GeneticAlgorithm(data, false);
 				
 				StringBuilder sb = new StringBuilder();
 				sb.append(data.name()).append(" ").append(data.solution()).append("\n");
 				sb.append(ga.algorithm()).append("\n");
-				
-				//ga.setInsertionAlgorithm(new LocalSearchInsert());
-				ga.setInsertionAlgorithm(new HeuristicInsert());
+				ga.setHybridized(true);
 				sb.append(ga.algorithm()).append("\n");
 				
 				System.out.println(sb.toString());

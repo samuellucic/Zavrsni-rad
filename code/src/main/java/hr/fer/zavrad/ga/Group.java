@@ -1,6 +1,7 @@
 package hr.fer.zavrad.ga;
 
 import java.util.List;
+import java.util.Objects;
 
 public class Group {
 	private List<GroupObject> group;
@@ -19,6 +20,21 @@ public class Group {
 			sum += go.getSize();
 		}
 		return sum;
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(group);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!(obj instanceof Group))
+			return false;
+		Group other = (Group) obj;
+		return Objects.equals(group, other.group);
 	}
 
 	@Override
