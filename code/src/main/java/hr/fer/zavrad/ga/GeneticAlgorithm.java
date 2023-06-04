@@ -85,9 +85,9 @@ public class GeneticAlgorithm {
 			// TODO
 			// OVO SLUZI DA ZNAM DA PROGRAM ZAPRAVO RADI
 			// OBRISATI KAD ZAVRSIM
-			if (generation % 1000 == 0) {
-				System.out.println("Name: " + data.name() + " Generation: " + generation + "\nEval: " + population[population.length - 1].getFitness() + "\nBin num: " + population[population.length - 1].getGroups().size());
-			}
+//			if (generation % 1000 == 0) {
+//				System.out.println("Name: " + data.name() + " Generation: " + generation + "\nEval: " + population[population.length - 1].getFitness() + "\nBin num: " + population[population.length - 1].getGroups().size());
+//			}
 			
 //			Chromosome[] newPopulation = new Chromosome[NUM_CROSS * 2];
 			for (int i = 0; i < NUM_CROSS; i++) {
