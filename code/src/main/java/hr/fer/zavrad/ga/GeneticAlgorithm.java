@@ -70,7 +70,7 @@ public class GeneticAlgorithm {
 		int generation = 0;
 		
 		loop:
-		for ( ; generation < 100_000; generation++) {
+		for ( ; generation < 50_000; generation++) {
 			// Best samples are at the end of the array
 			Arrays.sort(population);
 			

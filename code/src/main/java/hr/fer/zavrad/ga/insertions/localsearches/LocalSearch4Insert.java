@@ -25,6 +25,8 @@ public class LocalSearch4Insert implements IInsert {
 	private void iterations(Group group, List<GroupObject> items, double capacity) {
 		List<List<GroupObject>> lists = null;
 		double newBinSize = 0;
+		
+		loops:
 		for (int i = 1; i <= BIN_MAX; i++) {
 			for (int j = 1; j <= ITEMS_MAX; j++) {
 				List<List<GroupObject>> newLists = change(group, items, new ArrayList<>(), new ArrayList<>(), 0, 0, capacity, i, j);				
@@ -35,6 +37,10 @@ public class LocalSearch4Insert implements IInsert {
 				if (newSize > newBinSize) {
 					lists = newLists;
 					newBinSize = newSize;
+					
+					if (newSize == capacity) {
+						break loops;
+					}
 				}
 			}
 		}
@@ -60,30 +66,38 @@ public class LocalSearch4Insert implements IInsert {
 			double capacity,
 			int binMax,
 			int itemsMax) {
-		if (binReplacements.size() == binMax && itemsReplacements.size() == itemsMax) {
+		if (binReplacements.size() >= binMax && itemsReplacements.size() >= itemsMax) {
 			return List.of(binReplacements, itemsReplacements);
 		}
-		for (int i = numBin; i < group.getGroup().size(); i++) {
-			for (int j = numItems; j < items.size(); j++) {
-				List<GroupObject> binReplacementsNew = new ArrayList<>(binReplacements);
-				List<GroupObject> itemsReplacementsNew = new ArrayList<>(itemsReplacements);
-				binReplacementsNew.add(group.getGroup().get(i));
-				itemsReplacementsNew.add(items.get(j));
-				
-				List<List<GroupObject>> lists = change(
-						group,
-						items,
-						binReplacementsNew,
-						itemsReplacementsNew,
-						i + 1,
-						j + 1,
-						capacity,
-						binMax,
-						itemsMax);
-				if (lists == null) continue;
-				if (check(lists.get(0), lists.get(1), group.getTotalSize(), capacity)) {
-					return lists;
-				}
+
+
+		while (numBin < group.getGroup().size() || numItems < items.size()) {
+			List<GroupObject> binReplacementsNew = new ArrayList<>(binReplacements);
+			List<GroupObject> itemsReplacementsNew = new ArrayList<>(itemsReplacements);
+			
+			if (numBin < group.getGroup().size() && binReplacementsNew.size() < binMax) {
+				binReplacementsNew.add(group.getGroup().get(numBin));
+				numBin++;
+			}
+			if (numItems < items.size() && itemsReplacementsNew.size() < itemsMax) {
+				itemsReplacementsNew.add(items.get(numItems));	
+				numItems++;
+			}
+			
+			List<List<GroupObject>> lists = change(
+					group,
+					items,
+					binReplacementsNew,
+					itemsReplacementsNew,
+					numBin + 1,
+					numItems + 1,
+					capacity,
+					binMax,
+					itemsMax);
+			
+			if (lists == null) return null;
+			if (check(lists.get(0), lists.get(1), group.getTotalSize(), capacity)) {
+				return lists;
 			}
 		}
 		
