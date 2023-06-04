@@ -27,12 +27,11 @@ public class GeneticAlgorithm {
 		return cost / (double)groups.size();
 	};
 	
-	private static final int POP_SIZE = 50;
-	private static final int NUM_CROSS = 24;
+	private static final int POP_SIZE = 100;
+	private static final int NUM_CROSS = 25;
 	private static final int K = 2;
 	private static final int TOURNAMENT_NUM = 2;
-	private static final double MUTATION_PROBABILITY = 0.2;
-
+	public  double MUTATION_PROBABILITY = 0.2;
 	private static IInsert basicInsert = new BasicInsert();
 	private static IInsert[] heuristics = {
 			new FFDInsert(),
@@ -53,6 +52,10 @@ public class GeneticAlgorithm {
 		this.hybridized = hybridized;
 	}
 	
+	public GeneticAlgorithm(Data data) {
+		this(data, false);
+	}
+	
 	public void setHybridized(boolean hybridized) {
 		this.hybridized = hybridized;
 	}
@@ -66,14 +69,13 @@ public class GeneticAlgorithm {
 		
 		Chromosome[] population = createPopulation(POP_SIZE, dataList, random);
 		evaluatePopulation(population, COST_FUNCTION);
+		Arrays.sort(population);
 		
 		int generation = 0;
 		
 		loop:
 		for ( ; generation < 50_000; generation++) {
 			// Best samples are at the end of the array
-			Arrays.sort(population);
-			
 			for (Chromosome c : population) {
 				if (c.getGroups().size() <= data.solution()) {
 					//System.out.println(c.getFitness());
@@ -83,11 +85,11 @@ public class GeneticAlgorithm {
 			// TODO
 			// OVO SLUZI DA ZNAM DA PROGRAM ZAPRAVO RADI
 			// OBRISATI KAD ZAVRSIM
-//			if (generation % 1000 == 0) {
-//				System.out.println("Name: " + data.name() + " Generation: " + generation + "\nBin num: " + population[population.length - 1].getGroups().size());
-//			}
+			if (generation % 1000 == 0) {
+				System.out.println("Name: " + data.name() + " Generation: " + generation + "\nEval: " + population[population.length - 1].getFitness() + "\nBin num: " + population[population.length - 1].getGroups().size());
+			}
 			
-			Chromosome[] newPopulation = new Chromosome[NUM_CROSS * 2];
+//			Chromosome[] newPopulation = new Chromosome[NUM_CROSS * 2];
 			for (int i = 0; i < NUM_CROSS; i++) {
 				// Choosing parents from the best NUM_CROSS number of samples
 				Chromosome firstParent = pickParent(population, random, TOURNAMENT_NUM);
@@ -99,36 +101,59 @@ public class GeneticAlgorithm {
 				mutate(child1, random);
 				mutate(child2, random);
 				
-				newPopulation[2 * i] = child1;
-				newPopulation[2 * i + 1] = child2;
-			}
-			for (int i = 0; i < newPopulation.length; i++) {
-				population[i] = newPopulation[i];
-			}
+//				newPopulation[2 * i] = child1;
+//				newPopulation[2 * i + 1] = child2;
+				int index1 = Arrays.binarySearch(population, pickWorst(population, random, TOURNAMENT_NUM));
+				int index2 = Arrays.binarySearch(population, pickWorst(population, random, TOURNAMENT_NUM));
+				while (index1 == index2) {
+					index2 = Arrays.binarySearch(population, pickWorst(population, random, TOURNAMENT_NUM));
+				}
+				
+				population[index1] = child1;
+				population[index2] = child2;
 
-			evaluatePopulation(population, COST_FUNCTION);
+				evaluateIndividual(child1, COST_FUNCTION);
+				evaluateIndividual(child2, COST_FUNCTION);
+				Arrays.sort(population);
+								
+			}			
+//			for (int j = 0; j < newPopulation.length; j++) {
+//				population[j] = newPopulation[j];
+//			}
+//			
+//			evaluatePopulation(population, COST_FUNCTION);
+//			Arrays.sort(population);
 		}
 		
-		return "Generation: " + generation 
+		return "Generation: " + generation
+				+ "\nEval: " + population[population.length - 1].getFitness()
 				+ "\nHybridized: " + hybridized
 				+ "\nBin num: " + population[population.length - 1].getGroups().size()
 				+ "\nOptimal: " + (population[population.length - 1].getGroups().size() == data.solution());
 	}
 	
+	private Chromosome pickWorst(Chromosome[] population, Random random, int tournamentNum) {
+		return tournament(population, random, tournamentNum).get(0);		
+	}
+	
 	private Chromosome pickParent(Chromosome[] population, Random random, int tournamentNum) {
+		return tournament(population, random, tournamentNum).get(tournamentNum - 1);
+	}
+
+	private List<Chromosome> tournament(Chromosome[] population, Random random, int tournamentNum) {
 		List<Chromosome> tournamentPop = new ArrayList<>();
 		
 		while (tournamentPop.size() < tournamentNum) {
 			Chromosome newParent = population[random.nextInt(population.length)];
 			if (!tournamentPop.contains(newParent)) {
 				tournamentPop.add(newParent);
-			}
+			} 
 		}
 		tournamentPop.sort(null);;
 		
-		return tournamentPop.get(tournamentNum - 1);
+		return tournamentPop;
 	}
-
+	
 	private void mutate(Chromosome child, Random random) {
 		if (child.getGroups().size() < 2) {
 			return;
