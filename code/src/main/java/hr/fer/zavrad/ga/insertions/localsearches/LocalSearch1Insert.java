@@ -18,7 +18,7 @@ public class LocalSearch1Insert implements IInsert {
 			for (Group g : chromosome.getGroups()) {
 				double binSize = g.getTotalSize();
 				double maxBinSize = g.getTotalSize();
-				if (binSize == capacity) continue;
+				if (Double.compare(binSize, capacity) == 0) continue;
 				
 				GroupObject replacement = null;
 				GroupObject replaced = null;
@@ -26,7 +26,7 @@ public class LocalSearch1Insert implements IInsert {
 				for (GroupObject goBin : g.getGroup()) {
 					for (GroupObject goList : items) {
 						double newBinSize = binSize - goBin.getSize() + goList.getSize();
-						if (newBinSize > maxBinSize && newBinSize <= capacity) {
+						if (Double.compare(newBinSize, maxBinSize) > 0 && Double.compare(newBinSize, capacity) <= 0) {
 							maxBinSize = newBinSize;
 							replacement = goList;
 							replaced = goBin;

@@ -21,7 +21,7 @@ public class B2FInsert implements IInsert {
 			GroupObject go = items.get(0);
 			Group g = chromosome.getGroups().get(binIndex);
 			
-			if (go.getSize() + g.getTotalSize() <= capacity) {
+			if (Double.compare(go.getSize() + g.getTotalSize(), capacity) <= 0) {
 				g.getGroup().add(items.remove(0));
 			} else {
 				GroupObject smallest = g.getGroup().get(0);
@@ -38,7 +38,7 @@ public class B2FInsert implements IInsert {
 				for (int i = 0; i < items.size() - 1; i++) {
 					for (int j = i + 1; j < items.size(); j++) {
 						double newSize = items.get(i).getSize() + items.get(j).getSize() + g.getTotalSize() - smallest.getSize();
-						if (newSize <= capacity && newSize > g.getTotalSize()) {
+						if (Double.compare(newSize, capacity) <= 0 && Double.compare(newSize, g.getTotalSize()) > 0) {
 							items.add(g.getGroup().remove(smallestIndex));
 							g.getGroup().add(items.remove(j));
 							g.getGroup().add(items.remove(i));

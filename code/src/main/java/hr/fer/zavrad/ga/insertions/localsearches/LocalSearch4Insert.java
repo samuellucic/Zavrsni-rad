@@ -16,13 +16,20 @@ public class LocalSearch4Insert implements IInsert {
 	@Override
 	public void insert(Chromosome chromosome, List<GroupObject> items, double capacity) {
 		List<Group> groups = chromosome.getGroups();
-		for (Group g : groups) {
-			if (g.getTotalSize() == capacity) continue;
-			iterations(g, items, capacity);
+		boolean changed = true;
+		
+		while (changed) {
+			changed = false;
+			for (Group g : groups) {
+				if (Double.compare(g.getTotalSize(), capacity) == 0) continue;
+				if (iterations(g, items, capacity)) {
+					changed = true;
+				}
+			}
 		}
 	}
 	
-	private void iterations(Group group, List<GroupObject> items, double capacity) {
+	private boolean iterations(Group group, List<GroupObject> items, double capacity) {
 		List<List<GroupObject>> lists = null;
 		double newBinSize = 0;
 		
@@ -38,14 +45,14 @@ public class LocalSearch4Insert implements IInsert {
 					lists = newLists;
 					newBinSize = newSize;
 					
-					if (newSize == capacity) {
+					if (Double.compare(newSize, capacity) == 0) {
 						break loops;
 					}
 				}
 			}
 		}
 		
-		if (lists == null) return;
+		if (lists == null) return false;
 		for (GroupObject go : lists.get(0)) {
 			items.add(go);
 			group.getGroup().remove(go);
@@ -54,6 +61,7 @@ public class LocalSearch4Insert implements IInsert {
 			items.remove(go);
 			group.getGroup().add(go);
 		}
+		return true;
 	}
 
 	private List<List<GroupObject>> change(
@@ -106,7 +114,7 @@ public class LocalSearch4Insert implements IInsert {
 	
 	private boolean check(List<GroupObject> binReplacements, List<GroupObject> itemReplacements, double binSize, double capacity) {
 		double newBinSize = getNewBinSize(binReplacements, itemReplacements, binSize, capacity);
-		return newBinSize > binSize && newBinSize <= capacity;
+		return Double.compare(newBinSize, binSize) > 0 && Double.compare(newBinSize, capacity) <= 0;
 	}
 	
 	private double getNewBinSize(List<GroupObject> binReplacements, List<GroupObject> itemReplacements, double binSize, double capacity) {

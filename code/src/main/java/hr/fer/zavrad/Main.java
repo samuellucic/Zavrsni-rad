@@ -1,8 +1,14 @@
 package hr.fer.zavrad;
 
+import java.io.BufferedWriter;
+import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import hr.fer.zavrad.data.Data;
 import hr.fer.zavrad.data.DataLoader;
@@ -14,9 +20,22 @@ public class Main {
 		DataLoader dl = new DataLoader(Paths.get(args[0]));
 		Data data;
 		ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() / 4);//);1);//
+		List<Future<?>> tasks = new ArrayList<>();
+		
 		while ((data = dl.getDataset()) != null) {
 			Task t = new Task(data);//new Task(new Data("", 100.0, 12, 4,new double[] {50,3,48,53,53,4,3,41,23,20,52,49}));//
-			pool.submit(t);
+			tasks.add(pool.submit(t));
+		}
+		
+		for (Future<?> t : tasks) {
+			while (true) {
+				try {
+					t.get();
+					break;
+				} catch (InterruptedException | ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		pool.close();
 	}
@@ -39,6 +58,9 @@ public class Main {
 				ga.setHybridized(true);
 				sb.append(ga.algorithm()).append("\n");
 				
+				try (BufferedWriter bw = Files.newBufferedWriter(Paths.get("./results_" + data.name() + ".txt"))) {
+					bw.write(sb.toString());
+				}
 				System.out.println(sb.toString());
 			} catch (Exception e) {
 				e.printStackTrace();

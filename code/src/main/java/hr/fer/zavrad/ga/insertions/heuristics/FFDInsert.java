@@ -17,7 +17,7 @@ public class FFDInsert implements IInsert {
 		for (GroupObject go : items) {
 			boolean added = false;
 			for (Group g : chromosome.getGroups()) {
-				if (go.getSize() + g.getTotalSize() <= capacity) {
+				if (Double.compare(go.getSize() + g.getTotalSize(), capacity) <= 0) {
 					g.getGroup().add(go);
 					added = true;
 					break;

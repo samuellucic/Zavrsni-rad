@@ -21,7 +21,7 @@ public class BFDInsert implements IInsert {
 			int i = 0;
 			for (Group g : chromosome.getGroups()) {
 				double newMax = go.getSize() + g.getTotalSize();
-				if (newMax <= capacity && newMax > maxSize) {
+				if (Double.compare(newMax, capacity) <= 0 && Double.compare(newMax, maxSize) > 0) {
 					groupIndex = i;
 					maxSize = newMax;
 				}

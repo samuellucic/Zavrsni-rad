@@ -26,13 +26,13 @@ public class LocalSearch3Insert implements IInsert {
 					groupIter:
 					for (GroupObject go1 : g1.getGroup()) {
 						double binSize1 = g1.getTotalSize();
-						if (binSize1 == capacity) continue;
+						if (Double.compare(binSize1, capacity) == 0) continue;
 
 						for (GroupObject go2: g2.getGroup()) {
 							double newBinSize1 = binSize1 - go1.getSize() + go2.getSize();
 							double newBinSize2 = g2.getTotalSize() - go2.getSize() + go1.getSize();
 							
-							if (newBinSize1 > binSize1 && newBinSize1 <= capacity && newBinSize2 <= capacity) {
+							if (Double.compare(newBinSize1, binSize1) > 0  && Double.compare(newBinSize1, capacity) <= 0 && Double.compare(newBinSize2, capacity) <= 0) {
 								g1.getGroup().remove(go1);
 								g1.getGroup().add(go2);
 								g2.getGroup().remove(go2);
