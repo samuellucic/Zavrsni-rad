@@ -31,7 +31,8 @@ public class GeneticAlgorithm {
 	private static final int NUM_CROSS = 25;
 	private static final int K = 2;
 	private static final int TOURNAMENT_NUM = 2;
-	public  double MUTATION_PROBABILITY = 0.2;
+	private static final double MUTATION_PROBABILITY = 0.1;
+	private static final double INVERSION_PROBABILITY = 0.2;
 	private static IInsert basicInsert = new BasicInsert();
 	private static IInsert[] heuristics = {
 			new FFDInsert(),
@@ -101,6 +102,8 @@ public class GeneticAlgorithm {
 				mutate(child1, random);
 				mutate(child2, random);
 				
+				invert(child1, random);
+				invert(child2, random);
 //				newPopulation[2 * i] = child1;
 //				newPopulation[2 * i + 1] = child2;
 				int index1 = Arrays.binarySearch(population, pickWorst(population, random, TOURNAMENT_NUM));
@@ -132,6 +135,25 @@ public class GeneticAlgorithm {
 				+ "\nOptimal: " + (population[population.length - 1].getGroups().size() == data.solution());
 	}
 	
+	private void invert(Chromosome child, Random random) {
+		if (random.nextDouble() > INVERSION_PROBABILITY) {
+			return;
+		}
+		
+		List<Group> g = child.getGroups();
+		int size = g.size();
+		if (size < 2) {
+			return;
+		}
+		
+		int index1 = random.nextInt(size - 1); 
+		int index2 = random.nextInt(size); 
+		while (index1 >= index2) {
+			index2 = random.nextInt(size); 
+		}		
+		Collections.swap(g, index1, index2);
+	}
+
 	private Chromosome pickWorst(Chromosome[] population, Random random, int tournamentNum) {
 		return tournament(population, random, tournamentNum).get(0);		
 	}
